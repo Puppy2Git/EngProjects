@@ -286,6 +286,7 @@ elif keypressed == ord('s'):
     # cv2.imwrite('photo_RY_1.jpg',customized_image)
     cv2.destroyAllWindows()
 '''
+dosave = False
 while True:
     if (filename == None):
         ret, image = vid.read()#Grabs the ret and the frame
@@ -301,7 +302,26 @@ while True:
     
     if cv2.waitKey(1) & 0xFF == ord('q'):#Exits if the q key is pressed
         break
+    elif cv2.waitKey(1) &0xFF == ord('s'):
+        dosave = True
+        break
 
+if (dosave):
+    if(filename == None):
+        filename = "Video.jpg"
+    if (os.path.isfile('{0}_custom.jpg'.format(filename[:-4]))) == False:
+        cv2.imwrite('{0}_custom.jpg'.format(filename[:-4]), full_image)
+    else:
+        g = 1
+        Ndone = True
+        while Ndone:
+            if (os.path.isfile('{0}_custom_({1}).jpg'.format(filename[:-4],g))) == False:
+                cv2.imwrite('{0}_custom_({1}).jpg'.format(filename[:-4],g), full_image)
+                Ndone = False
+            else:
+                g += 1
+                
+    # cv2.imwrite('photo_RY_1.jpg',customized_image)
 cv2.destroyAllWindows()#Kill all windows
 vid.release()
 f.close()
