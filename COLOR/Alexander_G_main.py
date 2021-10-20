@@ -10,6 +10,7 @@ import cv2  # Image library
 import numpy  # Number Library
 import os #File Library
 import random #Random Library
+import json # Json Library
 
 def rgb(r, g, b):  # DUMB function that really only had one purpose!
     return([b, g, r])
@@ -26,14 +27,21 @@ for i in range(len(temp)):#Looping through each
 filename_valid = False#While false
 print("All .jpg files found in directory:")
 while filename_valid == False:# 
+    print("(-1) - Webcam")
     for i in range(len(myfiles)):#Loop through all files
         print("({0}) - {1}".format(i,myfiles[i]))#Display all files in the list
-    print("Which image would you like to edit? or if you want to use video press -1")#Ask what they would like to edit
+    print("Which image (or webcam) would you like to edit?")#Ask what they would like to edit
     filenumber = input(": ")#Input
     try:#Try
+        
         if (int(filenumber) != -1):
-            filename = str(myfiles[int(filenumber)])#To convert to int to grab str from list
-        filename_valid = True#Exit the loop
+            if (int(filenumber) > 0):#If it is a positive
+                filename = str(myfiles[int(filenumber)])#To convert to int to grab str from list
+                filename_valid = True#Exit the loop
+            else:
+                print("Can't use a negative number except (-1)")
+        else:
+            filename_valid = True#Exit the loop
     except IndexError:#If it is not in the array
         for i in range(10):
             print("")
@@ -43,8 +51,8 @@ while filename_valid == False:#
             print("")
         print("That is not a number")
 
-import json
-f = open("Alexander_G_data.json")
+
+f = open("Alexander_G_data.json")#IS THE SAME JSON FILE THING
 data = json.load(f)
 #Presets Test
 #Goal it should ask the user for a list of presets avaible and it should then genearate the windows with the presets
@@ -62,11 +70,14 @@ while valid_preset == False:#While preset is not valid
             print("({0}) - No Presets".format(i))#Otherwise print No preset
     user_preset = input(": ")#Store user input
     try:#If it is an int and in range
-        if (int(user_preset) == len(list(data["Presets"]))):#If it is no preset
-            valid_preset = True#True
+        if(int(user_preset) >= 0):
+            if (int(user_preset) == len(list(data["Presets"]))):#If it is no preset
+                valid_preset = True#True
+            else:
+                selected_preset = data["Presets"][list(data["Presets"])[int(user_preset)]]#If it is a preset
+                valid_preset = True
         else:
-            selected_preset = data["Presets"][list(data["Presets"])[int(user_preset)]]#If it is a preset
-            valid_preset = True
+            print("Number can't be a negative!")
     except IndexError:#If it is out of the list
         print("Number is not in selection")
     except:#If it is not a number
@@ -249,8 +260,10 @@ def generate_image(x):
     #Reshows the final image
     else:
         full_image = active_windows[cv2.getTrackbarPos("Selector",active_windows[0].name_window)-1].compaper
-    cv2.imshow('Custom {0}'.format(filename), full_image)
-
+    if (filename != None):
+        cv2.imshow('Custom {0}'.format(filename), full_image)
+    else:
+        cv2.imshow("Custom Webcam",full_image)
 #Adding the first 2 windows
 if (selected_preset != None):
     for i in range(len(selected_preset)):
@@ -262,7 +275,7 @@ if (selected_preset != None):
 else:
     active_windows.append(cus_window(0))
     active_windows.append(cus_window(1))
-
+cv2.setTrackbarMax("Selector",active_windows[0].name_window,len(active_windows))
 #Generate the image for the first time
 generate_image(-1)
 #Waiting for a key to be pressed
@@ -323,5 +336,5 @@ if (dosave):
                 
     # cv2.imwrite('photo_RY_1.jpg',customized_image)
 cv2.destroyAllWindows()#Kill all windows
-vid.release()
-f.close()
+vid.release()#Release the Webcam
+f.close()#Close the java file
