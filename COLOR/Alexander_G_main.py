@@ -275,9 +275,10 @@ if (selected_preset != None):
 else:
     active_windows.append(cus_window(0))
     active_windows.append(cus_window(1))
-cv2.setTrackbarMax("Selector",active_windows[0].name_window,len(active_windows))
+
 #Generate the image for the first time
 generate_image(-1)
+cv2.setTrackbarMax("Selector",active_windows[0].name_window,len(active_windows))
 #Waiting for a key to be pressed
 '''
 keypressed = cv2.waitKey(0)
