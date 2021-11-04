@@ -33,7 +33,8 @@ ARUCO_DICT = {
 Markers_names = {
     1 : "Elbow",
     2 : "Joint",
-    3 : "forearm"
+    3 : "forearm",
+    69 : "nice"
     }
 vid = cv2.VideoCapture(0)#Grabs the camera
 ret, frame = vid.read()#Grabs the ret and the frame (ret is useless)
@@ -85,6 +86,8 @@ def cleanup_deadmarkers():
 def drawfunnylineslmao():
     global markers#Getting markers
     global frame#Getting frame to draw to
+    for make in markers:
+        cv2.circle(frame, (make.posX, make.posY), 4, (0, 0, 255), -1)
     if (len(markers) == 1 or len(markers) == 0):#If there is not enough for a line
         None#Nothing
     elif (len(markers) == 2):#If there is only 2 markers
@@ -119,33 +122,35 @@ while True:# yes.
         #loop over the detected ArUCo corners
         for (markerCorner, markerID) in zip(corners, ids):
             # extract the marker corners (which are always returned in
-            #op-left, top-right, bottom-right, and bottom-left order)
+            #top-left, top-right, bottom-right, and bottom-left order)
             corners = markerCorner.reshape((4, 2))
             (topLeft, topRight, bottomRight, bottomLeft) = corners#Grabbing corners from list
-            #onvert each of the (x, y)-coordinate pairs to integers
+            #convert each of the (x, y)-coordinate pairs to integers
             topRight = (int(topRight[0]), int(topRight[1]))
             bottomRight = (int(bottomRight[0]), int(bottomRight[1]))
             bottomLeft = (int(bottomLeft[0]), int(bottomLeft[1]))
             topLeft = (int(topLeft[0]), int(topLeft[1]))
-            # draw the bounding box of the ArUCo detection
+            # draw the bounding box of the marker
+            '''
             cv2.line(frame, topLeft, topRight, (0, 255, 0), 2)
             cv2.line(frame, topRight, bottomRight, (0, 255, 0), 2)
             cv2.line(frame, bottomRight, bottomLeft, (0, 255, 0), 2)
             cv2.line(frame, bottomLeft, topLeft, (0, 255, 0), 2)
+            '''
             # compute and draw the center (x, y)-coordinates of the ArUco
             
             cX = int((topLeft[0] + bottomRight[0]) / 2.0)#Center point X
             cY = int((topLeft[1] + bottomRight[1]) / 2.0)#Center point Y
-            cv2.circle(frame, (cX, cY), 4, (0, 0, 255), -1)
             #Looking to see if there are in markers
             mak = in_markers(markerID)
             if (mak != None):#If they are
                 markers[mak].updatetimer()#update the timer
                 markers[mak].updatepos(cX,cY)#Update the pos
             else:#Otherwise
-                markers.append(marker(markerID,cX,cY))#Create a new one
+                if (markerID in Markers_names.keys()):#if it is in the markers
+                    markers.append(marker(markerID,cX,cY))#Create a new one
             #Write marker's ID ||Prob gonna del later
-            cv2.putText(frame, str(markerID), (topLeft[0], topLeft[1] - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            
 
     drawfunnylineslmao()#lmao
     lmaonameslmao()#lmao x 2
