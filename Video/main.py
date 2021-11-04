@@ -36,7 +36,7 @@ Markers_names = {
     3 : "forearm"
     }
 vid = cv2.VideoCapture(0)#Grabs the camera
-ret, frame = vid.read()#Grabs the ret and the frame
+ret, frame = vid.read()#Grabs the ret and the frame (ret is useless)
     
 markers = []
 #Does that marker thing class to store values with ease

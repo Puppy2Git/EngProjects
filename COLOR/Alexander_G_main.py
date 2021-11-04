@@ -24,6 +24,7 @@ for i in range(len(temp)):#Looping through each
         if len(str(temp[i])) >= 5:#If it has enough characters
             if str(temp[i])[-4:] == ".jpg":#If the ending is in .jpg
                 myfiles.append(temp[i])#Add it to the valid files
+print(temp)
 filename_valid = False#While false
 print("All .jpg files found in directory:")
 while filename_valid == False:# 
