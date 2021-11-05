@@ -5,6 +5,7 @@ import random #Random Library
 import math# meth
 import time#Za warldo
 
+angles = 0
 # define names of each possible ArUco tag OpenCV supports
 ARUCO_DICT = {
 	"DICT_4X4_50": cv2.aruco.DICT_4X4_50,
@@ -100,13 +101,40 @@ def drawfunnylineslmao():
                 cv2.line(frame,(markers[i].posX,markers[i].posY),(markers[i+1].posX,markers[i+1].posY),(0,255,255))
             else: #If it is the first marker
                 cv2.line(frame,(markers[i].posX,markers[i].posY),(markers[1].posX,markers[1].posY),(0,255,255))
+        
 
+#Returns distance
+def calculatedistance(x1,x2,y1,y2):
+    return (math.sqrt(math.pow((x2-x1),2)+math.pow((y2-y1),2)))
+
+def calculateangle():
+    global markers
+    temp1 = []
+    final = 0
+    if (len(markers) == 3):
+        for i in range(len(markers)):
+            temp1.append(markers[i])
+        temp1.sort(key=lambda x: x.mID, reverse=True)
+        #So now it is time to find angles
+        #0 is E
+        #1 is J
+        #2 is F
+        FtJ = calculatedistance(temp1[2].posX,temp1[1].posX,temp1[2].posY,temp1[1].posY)
+        JtE = calculatedistance(temp1[1].posX,temp1[0].posX,temp1[1].posY,temp1[0].posY)
+        FtE = calculatedistance(temp1[2].posX,temp1[0].posX,temp1[2].posY,temp1[0].posY)
+        final = math.acos(math.pow(FtJ,2) + math.pow(JtE,2) - math.pow(FtE,2) / 2 * FtJ * FtE)
+    return final
+        
+
+            
 #Draws the names lmao
 def lmaonameslmao():
+    global angles
     global markers #Markers again
     for thang in markers: #Get things in thing
         cv2.putText(frame, "Name: {0}  Pos: ({1},{2})".format(thang.name,thang.posX,thang.posY),( thang.posX, thang.posY), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 2)
-
+        if (thang.mID == 2):
+            cv2.putText(frame, "Angle {0}".format(angles))
 
 while True: #yes.
     #Choosing which marker to look for
