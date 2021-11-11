@@ -4,6 +4,8 @@ import os #File Library
 import random #Random Library
 import math# meth
 import time#Za warldo
+from pysine import sine
+
 
 angles = 0
 
@@ -31,6 +33,7 @@ ARUCO_DICT = {
 	"DICT_APRILTAG_36h10": cv2.aruco.DICT_APRILTAG_36h10,
 	"DICT_APRILTAG_36h11": cv2.aruco.DICT_APRILTAG_36h11
 }
+
 #The elbow's connected to the w h a t bone
 Markers_names = {
     1 : "Elbow",
@@ -183,7 +186,7 @@ while True: #yes.
                 if (markerID in Markers_names.keys()): #if it is in the markers
                     markers.append(marker(markerID,cX,cY)) #Create a new one
             #Write marker's ID ||Prob gonna del later
-            
+
     calculateangle()
     drawfunnylineslmao() #lmao
     lmaonameslmao() #lmao x 2
