@@ -52,6 +52,11 @@ ret, frame = vid.read() #Grabs the ret and the frame (ret is useless)
 markers = []
 #Does that marker thing class to store values with ease
 class marker:
+    """"This is a marker class used to define new markers\n
+    marker(The marker's ID, The X position, The Y position)\n
+    Ex:\n
+    For a new marker with an ID of 1, and Position of (50,23)\n
+    >>> boo = markers(1,50,23)"""
     def __init__(self,mID,posX,posY): #When being created
         self.mID = mID #Id
         self.posX = posX #Center X pos
@@ -63,24 +68,42 @@ class marker:
         
     #Updates timer
     def updatetimer(self):
+        """Called to update the time to the current time\n
+        Ex:\n
+        >>> marker.updatetimer()"""
         self.timer = time.time()
     #update position
     def updatepos(self,iX,iY):
+        """Called to update the position of the marker\n
+        Ex:\n
+        The marker has moved to (50,100)\n
+        >>> marker.updatepos(50,100)
+        """
         self.posX = iX
         self.posY = iY
 
 #takes the angle and gives feedback
 def feedback(target):
+    """This takes a given target range and plays a predefined sine frequency\n
+    feedback(target angle)\n
+    Ex:\n
+    For a target angle of 50\n
+    >>> feedback(50)"""
     global angles
     if angles < target:
-        sine(330, 0.05)
+        sine(330, 0.1)
     else:
-        sine(500, 0.05)
+        sine(500, 0.1)
         
 
 
 #Used to determin if marker is already in array
 def in_markers(minput):
+    """This returns whether the given ID is in markers\n
+    in_markers(Marker ID)\n
+    Ex:\n
+    To see if marker ID 3 is in the markers list\n
+    >>> in_markers(3)"""
     isin = None #not in the list
     for i in range(len(markers)): #Fine I'll check again
         if (markers[i].mID == minput): #I doubt it's going to be in
@@ -88,16 +111,13 @@ def in_markers(minput):
     return isin #final answers
 
 #takes the angle and gives feedback
-def feedback(target):
-    global angles
-    if angles < target:
-        sine(330, 0.05)
-    else:
-        sine(500, 0.05)
-        
+
 
 #scraps the dead markers off of the code
 def cleanup_deadmarkers():
+    """This is called to destroy markers who's timer extend longer than a predetermined time\n
+    cleanup_deadmarkers()\n
+    This should just be referenced in the while loop only"""
     global markers #Getting markers
     delay = 1 #Delay to kill markers
     markerstoKill = [] #List of markers to kill
@@ -112,6 +132,9 @@ def cleanup_deadmarkers():
 
 #Draws funny lines lamo
 def drawfunnylineslmao():
+    """This is used to draw the lines between each marker\n
+    drawfunnylineslmao()\n
+    This should just be referenced in the while loop only"""
     global markers #Getting markers
     global frame #Getting frame to draw to
     for make in markers:
@@ -132,10 +155,18 @@ def drawfunnylineslmao():
 
 #Returns distance between 2 points
 def calculatedistance(x1,x2,y1,y2):
+    """This is used to calculate the distance between 2 given points\n
+    calculatedistance(X position 1, X posiiton 2, Y position 1, Y position 2)\n
+    Ex:\n
+    To find the distance between (50,100) and (25, 120)\n
+    >>> calculatedistance(50,25,100,120)"""
     return (math.sqrt(math.pow((x2-x1),2)+math.pow((y2-y1),2)))
 
 #Uses the global markers to get le angles and set the global angle
 def calculateangle():
+    """This is used to calculated the angles between all markers\n
+    calculateangles()\n
+    This should just be referenced in the while loop only"""
     global markers
     global angles
     temp1 = []
@@ -159,6 +190,9 @@ def calculateangle():
             
 #Draws the names lmao
 def lmaonameslmao():
+    """This is used to draw the names of each marker\n
+    lmaonameslmao()\n
+    This should just be referenced in the while loop only"""
     global angles
     global markers #Markers again
     for thang in markers: #Get things in thing
