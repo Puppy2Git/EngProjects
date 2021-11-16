@@ -1,0 +1,21 @@
+{
+    "Target" : {
+        "Goal" : 0,
+        "Min_angle" : 30,
+        "Max_angle" : 180,
+        "Angle_buffer" : 3,
+        "Attempt_durration" : 30,
+        "Angle_durration" : 5
+    },
+    "Patient" : {
+        "Name" : "Bob",
+        "Id" : 123
+
+    },
+    "Logs" : {
+        "Date 1" : [],
+        "Date 2" : []
+
+    }
+
+}

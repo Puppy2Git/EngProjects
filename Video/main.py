@@ -6,8 +6,14 @@ import math# meth
 import time#Za warldo
 from pysine import sine
 
-
+#angles
 angles = 0
+
+#Json file read stuff
+#Target
+#   Goal, 0 = extension, 1 = contraction, 2 = both
+#   
+
 
 # define names of each possible ArUco tag OpenCV supports
 ARUCO_DICT = {
@@ -36,10 +42,9 @@ ARUCO_DICT = {
 
 #The elbow's connected to the w h a t bone
 Markers_names = {
-    1 : "Elbow",
-    2 : "Joint",
-    3 : "forearm",
-    69 : "nice"
+    1 : "Shoulder",
+    2 : "Elbow",
+    3 : "Forearm",
     }
 vid = cv2.VideoCapture(0)#Grabs the camera
 ret, frame = vid.read() #Grabs the ret and the frame (ret is useless)
@@ -63,6 +68,16 @@ class marker:
     def updatepos(self,iX,iY):
         self.posX = iX
         self.posY = iY
+
+#takes the angle and gives feedback
+def feedback(target):
+    global angles
+    if angles < target:
+        sine(330, 0.05)
+    else:
+        sine(500, 0.05)
+        
+
 
 #Used to determin if marker is already in array
 def in_markers(minput):
@@ -140,9 +155,9 @@ def lmaonameslmao():
     global markers #Markers again
     for thang in markers: #Get things in thing
         if (thang.mID != 2):
-            cv2.putText(frame, "Name: {0}  Pos: ({1},{2})".format(thang.name,thang.posX,thang.posY),( thang.posX, thang.posY), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 2)
+            cv2.putText(frame, "Name: {0}".format(thang.name),( thang.posX, thang.posY), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 2)
         else:
-            cv2.putText(frame, "Name: {0}  Pos: ({1},{2}) Angle: ({3})".format(thang.name,thang.posX,thang.posY,angles),( thang.posX, thang.posY), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 2)
+            cv2.putText(frame, "Name: {0} Angle: ({1})".format(thang.name,angles),( thang.posX, thang.posY), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 2)
 
 while True: #yes.
     #Choosing which marker to look for
@@ -194,6 +209,10 @@ while True: #yes.
     cv2.imshow("frame",frame)
     if cv2.waitKey(1) & 0xFF == ord('q'): #Exits if the q key is pressed
         break
+
+    print("Angle: {0}     ".format(int(angles)), end= "\r")
+    target = 90
+    feedback(target) #looks and compares target to the real time arm angle
     cleanup_deadmarkers() #Clean up the dead markers
     ret, frame = vid.read() #Getting new frame and ret
     
