@@ -87,6 +87,14 @@ def in_markers(minput):
             isin = i #Oh S**t it is 
     return isin #final answers
 
+#takes the angle and gives feedback
+def feedback(target):
+    global angles
+    if angles < target:
+        sine(330, 0.05)
+    else:
+        sine(500, 0.05)
+        
 
 #scraps the dead markers off of the code
 def cleanup_deadmarkers():
@@ -215,6 +223,8 @@ while True: #yes.
     feedback(target) #looks and compares target to the real time arm angle
     cleanup_deadmarkers() #Clean up the dead markers
     ret, frame = vid.read() #Getting new frame and ret
+    target = 90
+    feedback(target) #looks and compares target to the real time arm angle
     
 #Outside of while loop
 vid.release() #Releases camera from application
