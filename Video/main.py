@@ -6,25 +6,36 @@ import math# meth
 import time#Za warldo
 import json
 from pysine import sine
-
+import keyboard
 #angles
 angles = 0
-
-#Json file read stuff
-#Target
-#   Goal, 0 = extension, 1 = contraction, 2 = both
-#   Date = [# of times the target was met, # of attempts]
-
+"""
+Json file read stuff
+Target
+    (Done):
+        Goal, 0 = extension, 1 = contraction, 2 = both 
+        min_angle = Min target angle they should contact to (Done)
+        max_angle = Max target angle they sshould extend to (Done)
+        angle_buffer = The difference in the angle for it to still count as correct (Done)
+    (TODO):
+        Attempt_durration = How long should each attempt take
+        Angle_durration = How long the patient should hold the angle
+        Max_attempts = How many sucessful tries the patient should do
+        Date = [# of times the target was met, # of attempts]
+"""
+print(time.time())
 f = open("Video\Patient.json")
 data = json.load(f)
-print(time.ctime())
+print(time.ctime())#Date
 target_data = data["Target"]
 goal = target_data["Goal"]
 
+bending = False
 target = [target_data["Min_angle"], target_data["Max_angle"],target_data["Angle_buffer"]]
 attempt_durration = target_data["Attempt_durration"]
 angle_durration = target_data["Angle_durration"]
 max_attempts = target_data["Max_attempts"]
+
 # define names of each possible ArUco tag OpenCV supports
 ARUCO_DICT = {
 	"DICT_4X4_50": cv2.aruco.DICT_4X4_50,
@@ -58,7 +69,7 @@ Markers_names = {
     }
 vid = cv2.VideoCapture(0)#Grabs the camera
 ret, frame = vid.read() #Grabs the ret and the frame (ret is useless)
-    
+attempting = False
 markers = []
 #Does that marker thing class to store values with ease
 class marker:
@@ -92,6 +103,29 @@ class marker:
         self.posX = iX
         self.posY = iY
 
+class timer:
+    def __init__(self,duration=0,start=False):
+        self.start_time = time.time()
+        self.active = start
+        self.initduration = duration
+        self.duration = self.initduration
+    def pause_timer(self):
+        self.duration = self.duration - (time.time() - self.start_time)
+        self.active = False
+    def start_timer(self):
+        self.start_time = time.time()
+        self.active = True
+    def isDone(self):
+        if (self.active == True):
+            return (self.start_time + self.duration <= time.time())
+    def reset_timer(self):
+        self.duration = self.initduration
+        self.active = False
+    def hasStarted(self):
+        return (self.duration == self.initduration & self.active == False)
+attempt_timer = timer(attempt_durration,False)
+angle_timer = timer(angle_durration,False)
+
 #takes the angle and gives feedback
 def feedback(target):
     """This takes a given target range and plays a predefined sine frequency\n
@@ -99,24 +133,75 @@ def feedback(target):
     Ex:\n
     For a target angle of 50\n
     >>> feedback(50)"""
+    global attempting
     global angles
     global goal
-    if (goal == 0):
-        if angles > target[1] - target[2]:
-            sine(500, 0.1)
+    global bending
+    if (attempting):
+        
+        if (goal == 0):
+            if angles > target[1] - target[2]:
+                dobend(True)
+                bending = True
+                sine(500, 0.1)
+            else:
+                dobend(False)
+                bending = False
+                sine(330, 0.1)
+        elif (goal == 1):
+            if angles < target[0] + target[2]:
+                dobend(True)
+                bending = True
+                sine(500, 0.1)
+            else:
+                dobend(False)
+                bending = False
+                sine(330, 0.1)
         else:
-            sine(330, 0.1)
-    elif (goal == 1):
-        if angles < target[0] + target[2]:
-            sine(500, 0.1)
-        else:
-            sine(330, 0.1)
-    else:
-        if (angles > target[1] - target[2]) or (angles < target[0] + target[2]):
-            sine(500, 0.1)
-        else:
-            sine(330, 0.1)
+            if (angles > target[1] - target[2]) or (angles < target[0] + target[2]):
+                dobend(True)
+                bending = True
+                sine(500, 0.1)
+            else:
+                dobend(False)
+                bending = False
+                sine(330, 0.1)
+        
 
+def dobend(ye):
+    """This is used to control the active timers"""
+    global angle_timer
+    global attempt_timer
+    global attempt_durration
+    global angle_durration
+    global attempting
+    if ye and bending == False:#If they start to bend
+        if (angle_timer.hasStarted() == False):
+            angle_timer.reset_timer()
+            angle_timer.start_timer()
+        else:
+            angle_timer.start_timer()
+        attempt_timer.pause_timer()
+    elif ye == False and bending == True:#If they stop bending
+        angle_timer.pause_timer()
+        attempt_timer.start_timer()
+    elif ye and bending:# If they are activly bending
+        if (angle_timer.hasStarted):
+            if (angle_timer.isDone()):
+                print("Congratsssssssssss")
+                attempting = False
+                angle_timer.pause_timer()
+                angle_timer.reset_timer()
+                attempt_timer.pause_timer()
+                attempt_timer.reset_timer()
+    elif ye == False and bending == False:#If they are not bending
+        if (attempt_timer.isDone):
+            print("Booooooooooooooooo")
+            attempting = False
+            angle_timer.pause_timer()
+            angle_timer.reset_timer()
+            attempt_timer.pause_timer()
+            attempt_timer.reset_timer()
 
 #Used to determin if marker is already in array
 def in_markers(minput):
@@ -133,7 +218,16 @@ def in_markers(minput):
 
 #takes the angle and gives feedback
 
-
+def init_attempt():
+    """Called when space is pressed:
+    """
+    global attempting
+    global attempt_timer
+    global angle_timer
+    if (len(markers) == 3 & (attempting == False)):#if all 3 markers are present
+        attempting = True
+        attempt_timer.start_timer()
+        print("Lets go!!!!!!!!!")
 #scraps the dead markers off of the code
 def cleanup_deadmarkers():
     """This is called to destroy markers who's timer extend longer than a predetermined time\n
@@ -270,10 +364,13 @@ while True: #yes.
     lmaonameslmao() #lmao x 2
     #Showing the current frame
     cv2.imshow("frame",frame)
-    if cv2.waitKey(1) & 0xFF == ord('q'): #Exits if the q key is pressed
+    print(attempting)
+    if cv2.waitKey(1) & keyboard.is_pressed(57):
+        print("ye")
+        init_attempt()
+    elif cv2.waitKey(1) & keyboard.is_pressed('q'):
         break
-
-    print("Angle: {0}     ".format(int(angles)), end= "\r")
+    #print("Angle: {0}     ".format(int(angles)), end= "\r")
     feedback(target) #looks and compares target to the real time arm angle
     cleanup_deadmarkers() #Clean up the dead markers
     ret, frame = vid.read() #Getting new frame and ret
