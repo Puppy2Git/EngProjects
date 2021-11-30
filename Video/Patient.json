@@ -5,7 +5,8 @@
         "Max_angle" : 180,
         "Angle_buffer" : 3,
         "Attempt_durration" : 30,
-        "Angle_durration" : 5
+        "Angle_durration" : 5,
+        "Max_attempts" : 5
     },
     "Patient" : {
         "Name" : "Bob",
@@ -13,7 +14,7 @@
 
     },
     "Logs" : {
-        "Date 1" : [],
+        "Date 1" : [5,6],
         "Date 2" : []
 
     }

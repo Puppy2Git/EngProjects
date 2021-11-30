@@ -4,6 +4,7 @@ import os #File Library
 import random #Random Library
 import math# meth
 import time#Za warldo
+import json
 from pysine import sine
 
 #angles
@@ -12,9 +13,18 @@ angles = 0
 #Json file read stuff
 #Target
 #   Goal, 0 = extension, 1 = contraction, 2 = both
-#   
+#   Date = [# of times the target was met, # of attempts]
 
+f = open("Video\Patient.json")
+data = json.load(f)
+print(time.ctime())
+target_data = data["Target"]
+goal = target_data["Goal"]
 
+target = [target_data["Min_angle"], target_data["Max_angle"],target_data["Angle_buffer"]]
+attempt_durration = target_data["Attempt_durration"]
+angle_durration = target_data["Angle_durration"]
+max_attempts = target_data["Max_attempts"]
 # define names of each possible ArUco tag OpenCV supports
 ARUCO_DICT = {
 	"DICT_4X4_50": cv2.aruco.DICT_4X4_50,
@@ -90,11 +100,22 @@ def feedback(target):
     For a target angle of 50\n
     >>> feedback(50)"""
     global angles
-    if angles < target:
-        sine(330, 0.1)
+    global goal
+    if (goal == 0):
+        if angles > target[1] - target[2]:
+            sine(500, 0.1)
+        else:
+            sine(330, 0.1)
+    elif (goal == 1):
+        if angles < target[0] + target[2]:
+            sine(500, 0.1)
+        else:
+            sine(330, 0.1)
     else:
-        sine(500, 0.1)
-        
+        if (angles > target[1] - target[2]) or (angles < target[0] + target[2]):
+            sine(500, 0.1)
+        else:
+            sine(330, 0.1)
 
 
 #Used to determin if marker is already in array
@@ -253,13 +274,13 @@ while True: #yes.
         break
 
     print("Angle: {0}     ".format(int(angles)), end= "\r")
-    target = 90
     feedback(target) #looks and compares target to the real time arm angle
     cleanup_deadmarkers() #Clean up the dead markers
     ret, frame = vid.read() #Getting new frame and ret
-    target = 90
-    feedback(target) #looks and compares target to the real time arm angle
+    
     
 #Outside of while loop
+print("Angle: {0}     ".format(int(angles)))
 vid.release() #Releases camera from application
 cv2.destroyAllWindows() #Kill all windows
+f.close()
