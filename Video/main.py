@@ -176,6 +176,7 @@ def dobend(ye):
     global angle_durration
     global attempting
     if ye and bending == False:#If they start to bend
+        print("Starting to bend",end = "\r")
         if (angle_timer.hasStarted() == False):
             angle_timer.reset_timer()
             angle_timer.start_timer()
@@ -183,20 +184,22 @@ def dobend(ye):
             angle_timer.start_timer()
         attempt_timer.pause_timer()
     elif ye == False and bending == True:#If they stop bending
+        print("Stoping bend",end = "\r")
         angle_timer.pause_timer()
         attempt_timer.start_timer()
     elif ye and bending:# If they are activly bending
-        if (angle_timer.hasStarted):
-            if (angle_timer.isDone()):
-                print("Congratsssssssssss")
-                attempting = False
-                angle_timer.pause_timer()
-                angle_timer.reset_timer()
-                attempt_timer.pause_timer()
-                attempt_timer.reset_timer()
+        print("activly bending",end = "\r")
+        if (angle_timer.isDone()):
+            print("Congratsssssssssss")
+            attempting = False
+            angle_timer.pause_timer()
+            angle_timer.reset_timer()
+            attempt_timer.pause_timer()
+            attempt_timer.reset_timer()
     elif ye == False and bending == False:#If they are not bending
-        if (attempt_timer.isDone):
-            print("Booooooooooooooooo")
+        print("Not even bending",end = "\r")
+        if (attempt_timer.isDone()):
+            print("Booooooooooooooooo",end = "\r")
             attempting = False
             angle_timer.pause_timer()
             angle_timer.reset_timer()
@@ -224,10 +227,11 @@ def init_attempt():
     global attempting
     global attempt_timer
     global angle_timer
-    if (len(markers) == 3 & (attempting == False)):#if all 3 markers are present
+    print("called let's go!")
+    if ((len(markers) == 3) and (attempting == False)):#if all 3 markers are present
         attempting = True
         attempt_timer.start_timer()
-        print("Lets go!!!!!!!!!")
+        print("Lets go it is started up!!!!!!!!!")
 #scraps the dead markers off of the code
 def cleanup_deadmarkers():
     """This is called to destroy markers who's timer extend longer than a predetermined time\n
@@ -364,9 +368,8 @@ while True: #yes.
     lmaonameslmao() #lmao x 2
     #Showing the current frame
     cv2.imshow("frame",frame)
-    print(attempting)
+    
     if cv2.waitKey(1) & keyboard.is_pressed(57):
-        print("ye")
         init_attempt()
     elif cv2.waitKey(1) & keyboard.is_pressed('q'):
         break

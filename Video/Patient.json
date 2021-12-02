@@ -2,10 +2,10 @@
     "Target" : {
         "Goal" : 0,
         "Min_angle" : 30,
-        "Max_angle" : 180,
-        "Angle_buffer" : 3,
+        "Max_angle" : 110,
+        "Angle_buffer" : 5,
         "Attempt_durration" : 10,
-        "Angle_durration" : 5,
+        "Angle_durration" : 3,
         "Max_attempts" : 5
     },
     "Patient" : {
