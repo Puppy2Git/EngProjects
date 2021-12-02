@@ -191,6 +191,7 @@ def dobend(ye):
         print("activly bending",end = "\r")
         if (angle_timer.isDone()):
             print("Congratsssssssssss")
+            sine(600, 0.2)
             attempting = False
             angle_timer.pause_timer()
             angle_timer.reset_timer()
