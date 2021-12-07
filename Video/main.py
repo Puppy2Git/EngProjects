@@ -17,15 +17,17 @@ Target
         min_angle = Min target angle they should contact to (Done)
         max_angle = Max target angle they sshould extend to (Done)
         angle_buffer = The difference in the angle for it to still count as correct (Done)
-    (TODO):
         Attempt_durration = How long should each attempt take
         Angle_durration = How long the patient should hold the angle
+    (TODO):
         Max_attempts = How many sucessful tries the patient should do
         Date = [# of times the target was met, # of attempts]
+        UI
 """
-print(time.time())
+
 f = open("Video\Patient.json")
 data = json.load(f)
+print(data)
 print(time.ctime())#Date
 target_data = data["Target"]
 goal = target_data["Goal"]
@@ -125,6 +127,7 @@ class timer:
         return (self.duration == self.initduration & self.active == False)
 attempt_timer = timer(attempt_durration,False)
 angle_timer = timer(angle_durration,False)
+
 
 #takes the angle and gives feedback
 def feedback(target):
