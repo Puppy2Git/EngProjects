@@ -19,24 +19,44 @@ Target
         angle_buffer = The difference in the angle for it to still count as correct (Done)
         Attempt_durration = How long should each attempt take
         Angle_durration = How long the patient should hold the angle
-    (TODO):
-        Max_attempts = How many sucessful tries the patient should do
+        Write to Json file
         Date = [# of times the target was met, # of attempts]
-        UI
+    (TODO):
 """
-
-f = open("Video\Patient.json")
+start = False
+try:
+    f = open("Video\Patient.json", "r")
+    start = True
+except:
+    try:
+        f = open("Patient.json","r")
+        start = True
+    except:
+        print("No Patient.json file found please make sure it is in the same directory")
+if (start == False):
+    input("Press enter to quit: ")
+    quit()
 data = json.load(f)
 print(data)
-print(time.ctime())#Date
 target_data = data["Target"]
 goal = target_data["Goal"]
-
+log_data = data["Logs"]
+Patient_data = data["Patient"]
 bending = False
 target = [target_data["Min_angle"], target_data["Max_angle"],target_data["Angle_buffer"]]
 attempt_durration = target_data["Attempt_durration"]
 angle_durration = target_data["Angle_durration"]
 max_attempts = target_data["Max_attempts"]
+nice_attempts = 0
+#telling the Patient how it works
+print("""
+Please put on the markers\n
+When you are ready with your attempt, press 'space' \n
+There are 2 tones used to indicate wether you have bent far enough\n
+Hold it in that position until the tones stop\n
+Then keep attempting till you are out of attempts\n
+Then press 'q' to quit\n
+""")
 
 # define names of each possible ArUco tag OpenCV supports
 ARUCO_DICT = {
@@ -178,8 +198,9 @@ def dobend(ye):
     global attempt_durration
     global angle_durration
     global attempting
+    global max_attempts
+    global nice_attempts
     if ye and bending == False:#If they start to bend
-        print("Starting to bend",end = "\r")
         if (angle_timer.hasStarted() == False):
             angle_timer.reset_timer()
             angle_timer.start_timer()
@@ -187,28 +208,26 @@ def dobend(ye):
             angle_timer.start_timer()
         attempt_timer.pause_timer()
     elif ye == False and bending == True:#If they stop bending
-        print("Stoping bend",end = "\r")
         angle_timer.pause_timer()
         attempt_timer.start_timer()
     elif ye and bending:# If they are activly bending
-        print("activly bending",end = "\r")
         if (angle_timer.isDone()):
-            print("Congratsssssssssss")
             sine(600, 0.2)
             attempting = False
             angle_timer.pause_timer()
             angle_timer.reset_timer()
             attempt_timer.pause_timer()
             attempt_timer.reset_timer()
+            max_attempts -= 1
+            nice_attempts += 1
     elif ye == False and bending == False:#If they are not bending
-        print("Not even bending",end = "\r")
         if (attempt_timer.isDone()):
-            print("Booooooooooooooooo",end = "\r")
             attempting = False
             angle_timer.pause_timer()
             angle_timer.reset_timer()
             attempt_timer.pause_timer()
             attempt_timer.reset_timer()
+            max_attempts -= 1
 
 #Used to determin if marker is already in array
 def in_markers(minput):
@@ -232,7 +251,7 @@ def init_attempt():
     global attempt_timer
     global angle_timer
     print("called let's go!")
-    if ((len(markers) == 3) and (attempting == False)):#if all 3 markers are present
+    if ((len(markers) == 3) and (attempting == False) and (max_attempts > 0)):#if all 3 markers are present
         attempting = True
         attempt_timer.start_timer()
         print("Lets go it is started up!!!!!!!!!")
@@ -275,6 +294,9 @@ def drawfunnylineslmao():
             else: #If it is the first marker
                 cv2.line(frame,(markers[i].posX,markers[i].posY),(markers[1].posX,markers[1].posY),(0,255,255))
         
+def logtojson():
+
+    print("test")
 
 #Returns distance between 2 points
 def calculatedistance(x1,x2,y1,y2):
@@ -377,14 +399,26 @@ while True: #yes.
         init_attempt()
     elif cv2.waitKey(1) & keyboard.is_pressed('q'):
         break
-    #print("Angle: {0}     ".format(int(angles)), end= "\r")
+    print("You have {0}  attempts left     ".format(int(max_attempts)), end= "\r")
     feedback(target) #looks and compares target to the real time arm angle
     cleanup_deadmarkers() #Clean up the dead markers
     ret, frame = vid.read() #Getting new frame and ret
-    
-    
+
 #Outside of while loop
-print("Angle: {0}     ".format(int(angles)))
+log_data[time.ctime()] = [nice_attempts, target_data["Max_attempts"] - max_attempts]
+todump = { "Target":target_data,
+"Patient" : Patient_data,
+"Logs" : log_data}
+f.close()
+try:
+    f = open("Video\Patient.json", "w")
+except:
+    try:
+        f = open("Patient.json","w")
+    except:
+        print("No Patient.json file found")
+f.write(json.dumps(todump,sort_keys=False, indent=4))
+#Outside of while loop
 vid.release() #Releases camera from application
 cv2.destroyAllWindows() #Kill all windows
 f.close()
