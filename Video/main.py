@@ -9,20 +9,7 @@ from pysine import sine
 import keyboard
 #angles
 angles = 0
-"""
-Json file read stuff
-Target
-    (Done):
-        Goal, 0 = extension, 1 = contraction, 2 = both 
-        min_angle = Min target angle they should contact to (Done)
-        max_angle = Max target angle they sshould extend to (Done)
-        angle_buffer = The difference in the angle for it to still count as correct (Done)
-        Attempt_durration = How long should each attempt take
-        Angle_durration = How long the patient should hold the angle
-        Write to Json file
-        Date = [# of times the target was met, # of attempts]
-    (TODO):
-"""
+
 start = False
 try:
     f = open("Video\Patient.json", "r")
@@ -37,7 +24,7 @@ if (start == False):
     input("Press enter to quit: ")
     quit()
 data = json.load(f)
-print(data)
+
 target_data = data["Target"]
 goal = target_data["Goal"]
 log_data = data["Logs"]
@@ -53,7 +40,7 @@ print("""
 Please put on the markers\n
 When you are ready with your attempt, press 'space' \n
 There are 2 tones used to indicate wether you have bent far enough\n
-Hold it in that position until the tones stop\n
+Hold it in that position until the tones changes\n
 Then keep attempting till you are out of attempts\n
 Then press 'q' to quit\n
 """)
@@ -220,6 +207,8 @@ def dobend(ye):
             attempt_timer.reset_timer()
             max_attempts -= 1
             nice_attempts += 1
+            print("Congrats!")
+            print("You have {0} attempts left".format(str(max_attempts)))
     elif ye == False and bending == False:#If they are not bending
         if (attempt_timer.isDone()):
             attempting = False
@@ -228,6 +217,8 @@ def dobend(ye):
             attempt_timer.pause_timer()
             attempt_timer.reset_timer()
             max_attempts -= 1
+            print("Sorry, not this attempt!")
+            print("You have {0} attempts left".format(str(max_attempts)))
 
 #Used to determin if marker is already in array
 def in_markers(minput):
@@ -235,7 +226,7 @@ def in_markers(minput):
     in_markers(Marker ID)\n
     Ex:\n
     To see if marker ID 3 is in the markers list\n
-    >>> in_markers(3)"""
+    >>> in_markers(3) --> True"""
     isin = None #not in the list
     for i in range(len(markers)): #Fine I'll check again
         if (markers[i].mID == minput): #I doubt it's going to be in
@@ -250,18 +241,16 @@ def init_attempt():
     global attempting
     global attempt_timer
     global angle_timer
-    print("called let's go!")
     if ((len(markers) == 3) and (attempting == False) and (max_attempts > 0)):#if all 3 markers are present
         attempting = True
         attempt_timer.start_timer()
-        print("Lets go it is started up!!!!!!!!!")
 #scraps the dead markers off of the code
 def cleanup_deadmarkers():
     """This is called to destroy markers who's timer extend longer than a predetermined time\n
     cleanup_deadmarkers()\n
     This should just be referenced in the while loop only"""
     global markers #Getting markers
-    delay = 1 #Delay to kill markers
+    delay = 1.5 #Delay to kill markers
     markerstoKill = [] #List of markers to kill
     for i in range(len(markers)): #through all markers
         if(time.time() - markers[i].timer >= delay): #if they are too small
@@ -294,9 +283,6 @@ def drawfunnylineslmao():
             else: #If it is the first marker
                 cv2.line(frame,(markers[i].posX,markers[i].posY),(markers[1].posX,markers[1].posY),(0,255,255))
         
-def logtojson():
-
-    print("test")
 
 #Returns distance between 2 points
 def calculatedistance(x1,x2,y1,y2):
@@ -304,7 +290,7 @@ def calculatedistance(x1,x2,y1,y2):
     calculatedistance(X position 1, X posiiton 2, Y position 1, Y position 2)\n
     Ex:\n
     To find the distance between (50,100) and (25, 120)\n
-    >>> calculatedistance(50,25,100,120)"""
+    >>> calculatedistance(50,25,100,120) -> 32.0156"""
     return (math.sqrt(math.pow((x2-x1),2)+math.pow((y2-y1),2)))
 
 #Uses the global markers to get le angles and set the global angle
@@ -342,9 +328,9 @@ def lmaonameslmao():
     global markers #Markers again
     for thang in markers: #Get things in thing
         if (thang.mID != 2):
-            cv2.putText(frame, "Name: {0}".format(thang.name),( thang.posX, thang.posY), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 2)
+            cv2.putText(frame, "{0}".format(thang.name),( thang.posX, thang.posY), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 2)
         else:
-            cv2.putText(frame, "Name: {0} Angle: ({1})".format(thang.name,angles),( thang.posX, thang.posY), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 2)
+            cv2.putText(frame, "{0} Angle: ({1})".format(thang.name,angles),( thang.posX, thang.posY), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 2)
 
 while True: #yes.
     #Choosing which marker to look for
@@ -399,7 +385,7 @@ while True: #yes.
         init_attempt()
     elif cv2.waitKey(1) & keyboard.is_pressed('q'):
         break
-    print("You have {0}  attempts left     ".format(int(max_attempts)), end= "\r")
+    #print("You have {0}  attempts left     ".format(int(max_attempts)), end= "\r")
     feedback(target) #looks and compares target to the real time arm angle
     cleanup_deadmarkers() #Clean up the dead markers
     ret, frame = vid.read() #Getting new frame and ret
